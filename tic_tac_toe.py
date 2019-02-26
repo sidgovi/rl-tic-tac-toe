@@ -81,43 +81,66 @@ def get_state():
 		state += val * (3**(8-i))
 	return state
 	
-def train_agentx(nepoch):
+def agent(player):
 	state = 0
 	move = 0
 	epsilon = .1
-	alpha = .5
+	alpha = .1
 	gamma = .6
 	index =0
 	move_count = 0
-	player = ' '
-	for i in range(0, nepoch):
-		if i % 1000 == 0:
-			print i, "/", nepoch
-		init_board()
-		move_count = 0
-		while not is_done():
-			if move_count % 2 == 0:
-				player = 'X'
-				index = 0
-			else:
-				player = 'O'
-				index = 1
+	#print("player=",player)
+	while not is_done():
+		if player == 'X':
+			index = 0
+			opp_player = 'O'
+		else:
+			index = 1
+			opp_player = 'X'
+		if random.uniform(0,1) < epsilon:
+			move = get_random_move()
+			place_move(player, move)
+		else:
+			state = get_state()
+			move = get_curr_best_move(state, player)
+			illegal =  place_move(player, move)
+			if illegal:
+				continue
+
+		agent_opp(opp_player)
+	#	raw_input("Press enter to continue")
+		old_val = qtable[index,state, move]
+		next_state = get_state()
+		next_max = np.max(qtable[index, next_state])
+		rew = reward(player)
+	#	print("player=",player,"reward =", rew)
+		new_val = (1 - alpha) * old_val + alpha * (rew + gamma * next_max)
+		qtable[index,state,move] = new_val
+
+def agent_opp(player):
+	epsilon = .1
+	if player == 'X':
+		index = 0
+		opp_player = 'O'
+	else:
+		index = 1
+		opp_player = 'X'
+
+	illegal = True
+	if not is_done(): 
+		while (illegal):
 			if random.uniform(0,1) < epsilon:
 				move = get_random_move()
 				place_move(player, move)
+				illegal = False
 			else:
 				state = get_state()
 				move = get_curr_best_move(state, player)
 				illegal =  place_move(player, move)
-				if illegal:
-					continue
-			move_count += 1
-			old_val = qtable[index,state, move]
-			next_state = get_state()
-			next_max = np.max(qtable[index, next_state])
-			rew = reward(player)
-			new_val = (1 - alpha) * old_val + alpha * (rew + gamma * next_max)
-			qtable[index,state,move] = new_val
+	else:
+		return
+	
+	return
 
 def play():
 	init_board()
@@ -130,10 +153,19 @@ def play():
 		place_move('O', move)
 		print_board()
 		
-		
-
-train(10000000)
+#nepoch = 500000
+#for i in range (0, nepoch):
+#	init_board()
+#	if i % 2 == 0:
+#		player = 'X'
+#		agent(player)
+#	else:
+#		agent_opp('X')
+#		player = 'O'
+#		agent(player)
+#	if i % 1000 == 0:
+#		print i, "/", nepoch
+#
+#np.save("qtable-500k", qtable)
+qtable = np.load("qtable-500k.npy")
 play()
-
-
-print qtable[0,0]
