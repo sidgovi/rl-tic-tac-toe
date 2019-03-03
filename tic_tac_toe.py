@@ -126,46 +126,51 @@ def agent_opp(player):
 		index = 1
 		opp_player = 'X'
 
+#	print("player = ",player)
+#	print_board()
+#	print("-------")
 	illegal = True
 	if not is_done(): 
-		while (illegal):
-			if random.uniform(0,1) < epsilon:
-				move = get_random_move()
-				place_move(player, move)
-				illegal = False
-			else:
-				state = get_state()
-				move = get_curr_best_move(state, player)
-				illegal =  place_move(player, move)
+		while illegal == True:
+#			if random.uniform(0,1) < epsilon:
+#				move = get_random_move()
+#				place_move(player, move)
+#				illegal = False
+#			else:
+			state = get_state()
+			move = get_curr_best_move(state, player)
+			illegal =  place_move(player, move)
+#		print_board()
+#		print("-------")
 	else:
-		return
+		return False
 	
-	return
+	return True
 
 def play():
 	init_board()
 	while not is_done():
-		print qtable[0,get_state()]
-		move = get_curr_best_move(get_state(), 'X')
+		move = input("Move?")
 		place_move('X', move)
 		print_board()
-		move = input("Move?")
+		print qtable[1,get_state()]
+		move = get_curr_best_move(get_state(), 'O')
 		place_move('O', move)
 		print_board()
 		
-#nepoch = 500000
-#for i in range (0, nepoch):
-#	init_board()
-#	if i % 2 == 0:
-#		player = 'X'
-#		agent(player)
-#	else:
-#		agent_opp('X')
-#		player = 'O'
-#		agent(player)
-#	if i % 1000 == 0:
-#		print i, "/", nepoch
-#
-#np.save("qtable-500k", qtable)
-qtable = np.load("qtable-500k.npy")
-play()
+nepoch = 500000
+for i in range (0, nepoch):
+	init_board()
+	if i % 2 == 0:
+		player = 'X'
+		agent(player)
+	else:
+		agent_opp('X')
+		player = 'O'
+		agent(player)
+	if i % 1000 == 0:
+		print i, "/", nepoch
+
+np.save("qtable-500k", qtable)
+#qtable = np.load("qtable.npy")
+#play()
